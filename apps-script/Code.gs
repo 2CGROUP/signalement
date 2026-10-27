@@ -10,6 +10,9 @@
  *  - vérifie le code d'accès commun, applique une limite d'envois par heure ;
  *  - met les signalements en file d'attente (propriétés du script, sans historique) ;
  *  - envoie chaque matin un seul mail groupé à la boîte d'alerte, puis vide la file ;
+ *  - peut prévenir d'autres personnes par un court avis SANS CONTENU (nombre de déclarations) :
+ *    renseigner leurs adresses, séparées par des virgules, dans la propriété du script NOTIFY_TO
+ *    (Paramètres du projet > Propriétés du script). Ne jamais écrire ces adresses dans ce fichier ;
  *  - ne journalise aucun contenu.
  *
  * Déploiement : Application Web, « Exécuter en tant que : moi », « Qui a accès : Tout le monde ».
@@ -44,6 +47,7 @@ const CONFIG = {
 };
 
 const PROP_CODE = 'ACCESS_CODE';
+const PROP_NOTIFY = 'NOTIFY_TO';
 const CODE_LENGTH = 12;          // 12 caractères parmi 32 : environ 60 bits, hors de portée d'une attaque par force brute
 const QUEUE_PREFIX = 'q|';
 const CHUNK_CHARS = 2500;        // une propriété est limitée à 9 Ko
@@ -200,10 +204,12 @@ function flush_(props) {
 
   const n = reports.length;
   const today = Utilities.formatDate(new Date(), TZ, 'dd/MM/yyyy');
+  const urgent = reports.some(function (r) { return r.urgent && r.urgent.indexOf('OUI') === 0; });
+  const subject = (urgent ? '[URGENT] ' : '')
+    + '[Signalements] ' + n + (n > 1 ? ' nouvelles déclarations' : ' nouvelle déclaration') + ' — ' + today;
   const mail = {
     to: CONFIG.RECIPIENT || Session.getEffectiveUser().getEmail(), // propriétaire du script, jamais le visiteur
-    subject: (reports.some(function (r) { return r.urgent && r.urgent.indexOf('OUI') === 0; }) ? '[URGENT] ' : '')
-      + '[Signalements] ' + n + (n > 1 ? ' nouvelles déclarations' : ' nouvelle déclaration') + ' — ' + today,
+    subject: subject,
     name: CONFIG.SENDER_NAME,
     htmlBody: reports.map(buildHtml_).join('<hr style="border:0;border-top:2px solid #cdc6fa;margin:28px 0">') + footerHtml_(),
     body: reports.map(buildText_).join('\n\n----------------------------------------\n\n'),
@@ -212,6 +218,26 @@ function flush_(props) {
 
   MailApp.sendEmail(mail); // si l'envoi échoue, rien n'est supprimé
   doneKeys.forEach(function (k) { props.deleteProperty(k); });
+  notify_(props, subject, n);
+}
+
+// Avis sans contenu : seulement le nombre de déclarations et, le cas échéant, la mention [URGENT].
+// Envoyé après le vidage de la file : un échec ici ne bloque ni ne duplique le mail principal.
+function notify_(props, subject, n) {
+  const to = String(props.getProperty(PROP_NOTIFY) || '').split(',')
+    .map(function (s) { return s.trim(); }).filter(isEmail_);
+  if (!to.length) return;
+  try {
+    MailApp.sendEmail({
+      to: to.join(','),
+      subject: subject,
+      name: CONFIG.SENDER_NAME,
+      body: (n > 1 ? n + ' nouvelles déclarations ont été transmises' : 'Une nouvelle déclaration a été transmise')
+        + ' à la boîte du comité d’éthique.\nLe contenu n’est pas reproduit dans ce message.',
+    });
+  } catch (e) {
+    console.log('Avis sans contenu non envoyé.'); // ni adresse ni contenu dans le journal
+  }
 }
 
 /* ================= Helpers ================= */
