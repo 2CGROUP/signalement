@@ -49,17 +49,17 @@
     </details>
   </section>
 
-  <form id="gate" class="gate" novalidate>
+  <form id="gate" class="gate" novalidate autocomplete="off">
     <label for="accessCode">Code d’accès</label>
     <p class="help">Il figure dans l’espace Notion du groupe. Il est le même pour tout le monde et ne permet pas de vous identifier.</p>
     <div class="gate-row">
-      <input type="text" id="accessCode" name="accessCode" maxlength="20" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX" required>
+      <input type="text" id="accessCode" name="accessCode" maxlength="20" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX-XXXX" required>
       <button type="submit" id="unlock">Accéder au formulaire</button>
     </div>
     <p class="error" id="gateError" role="alert"></p>
   </form>
 
-  <form id="report" novalidate hidden>
+  <form id="report" novalidate hidden autocomplete="off">
     <fieldset>
       <legend><span class="step">Étape 1 sur 3</span><span class="h2">Le contexte</span></legend>
       <div class="field">
@@ -91,7 +91,7 @@
       </div>
       <div class="field">
         <label for="period">Quand les faits se sont-ils produits&nbsp;? <span class="opt">(facultatif)</span></label>
-        <input type="text" id="period" name="period" maxlength="300" placeholder="Par exemple&nbsp;: depuis septembre, de façon répétée">
+        <input type="text" id="period" name="period" autocomplete="off" maxlength="300" placeholder="Par exemple&nbsp;: depuis septembre, de façon répétée">
       </div>
     </fieldset>
 
@@ -100,18 +100,18 @@
         <span class="hint">Décrivez ce qui s’est passé, le plus précisément possible&nbsp;: où, comment, à quelle fréquence.</span></legend>
       <div class="field">
         <label for="description">Description des faits</label>
-        <textarea id="description" name="description" maxlength="10000" required></textarea>
+        <textarea id="description" name="description" autocomplete="off" maxlength="10000" required></textarea>
         <div class="counter"><span id="count">0</span> / 10&nbsp;000</div>
       </div>
       <div class="field">
         <label for="people">Personnes impliquées <span class="opt">(facultatif)</span></label>
         <p class="help">Auteur(s) présumé(s), témoins éventuels.</p>
-        <textarea id="people" name="people" maxlength="3000"></textarea>
+        <textarea id="people" name="people" autocomplete="off" maxlength="3000"></textarea>
       </div>
       <div class="field">
         <label for="evidence">Éléments dont vous disposez <span class="opt">(facultatif)</span></label>
         <p class="help">Décrivez-les sans les joindre (messages, e-mails, documents…). Ils pourront vous être demandés si vous laissez un contact.</p>
-        <textarea id="evidence" name="evidence" maxlength="3000"></textarea>
+        <textarea id="evidence" name="evidence" autocomplete="off" maxlength="3000"></textarea>
       </div>
     </fieldset>
 
