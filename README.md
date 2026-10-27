@@ -29,3 +29,4 @@ Formulaire de signalement interne, anonyme. Ce dépôt est public volontairement
 
 ## Licences
 Polices Newsreader et Public Sans sous licence SIL Open Font License (voir `docs/assets/fonts/`).
+
