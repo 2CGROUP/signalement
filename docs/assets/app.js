@@ -60,7 +60,7 @@
       var form = $('report');
       form.hidden = false;
       form.classList.add('appear');
-      $('entity').focus();
+      $('name').focus();
     } catch (err) {
       gateError.textContent = 'Code d’accès incorrect. Vérifiez le code indiqué dans l’espace Notion du groupe.';
       $('accessCode').select();
@@ -76,36 +76,107 @@
   var send = $('send');
   var error = $('error');
   var desc = $('description');
+  var lastCopy = '';
 
   desc.addEventListener('input', function () {
     $('count').textContent = desc.value.length.toLocaleString('fr-FR');
   });
 
+  // Rubrique 10 : en cas d'urgence, rappeler que le formulaire n'est pas traité en temps réel
+  Array.prototype.forEach.call(document.querySelectorAll('input[name="urgent"]'), function (r) {
+    r.addEventListener('change', function () { $('urgentInfo').hidden = !(r.checked && r.value === 'oui'); });
+  });
+
+  function val(name) { var el = form.elements[name]; return el ? String(el.value || '').trim() : ''; }
+  function all(name) {
+    return Array.prototype.filter.call(form.querySelectorAll('input[name="' + name + '"]'), function (i) { return i.checked; })
+      .map(function (i) { return i.value; });
+  }
+  function one(name) { var a = all(name); return a.length ? a[0] : ''; }
+
   function collect() {
     return {
       accessCode: accessCode,
-      entity: $('entity').value,
-      category: $('category').value,
-      period: $('period').value.trim(),
-      description: desc.value.trim(),
-      people: $('people').value.trim(),
-      evidence: $('evidence').value.trim(),
-      contact: $('contact').value.trim(),
-      goodFaith: $('goodFaith').checked,
-      website: $('website').value
+      name: val('name'), contact: val('contact'),
+      roles: all('roles'), rolesOther: val('rolesOther'),
+      subjects: all('subjects'), subjectsOther: val('subjectsOther'),
+      discriminationGround: val('discriminationGround'), subjectDetails: val('subjectDetails'),
+      description: val('description'),
+      dateFrom: val('dateFrom'), dateTo: val('dateTo'), place: val('place'),
+      frequency: one('frequency'), usualTime: val('usualTime'),
+      accusedName: val('accusedName'), accusedService: val('accusedService'), hierarchy: one('hierarchy'),
+      evidence: all('evidence'), evidenceWitnesses: val('evidenceWitnesses'),
+      evidenceDocuments: val('evidenceDocuments'), evidenceMedical: val('evidenceMedical'),
+      steps: all('steps'), stepsOther: val('stepsOther'),
+      expectations: all('expectations'), expectationsOther: val('expectationsOther'),
+      urgent: one('urgent'),
+      certifyAccurate: $('certifyAccurate').checked, certifyInformed: $('certifyInformed').checked,
+      website: val('website')
     };
   }
 
+  function isEmpty(d) {
+    var keys = Object.keys(d).filter(function (k) {
+      return ['accessCode', 'website', 'certifyAccurate', 'certifyInformed', 'urgent'].indexOf(k) === -1;
+    });
+    return keys.every(function (k) { return Array.isArray(d[k]) ? d[k].length === 0 : !d[k]; });
+  }
+
   function check(d) {
-    if (!d.entity) return ['entity', 'Choisissez l’entité concernée.'];
-    if (!d.category) return ['category', 'Choisissez le type de faits.'];
-    if (d.description.length < 30) return ['description', 'Décrivez les faits en quelques phrases (30 caractères minimum).'];
-    if (d.contact && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.contact)) return ['contact', 'Cette adresse e-mail n’est pas valide. Corrigez-la ou laissez le champ vide.'];
-    if (!d.goodFaith) return ['goodFaith', 'Cochez la case de bonne foi pour envoyer le signalement.'];
+    if (isEmpty(d)) return ['description', 'Le formulaire est vide. Décrivez au moins la situation que vous souhaitez signaler.'];
+    if (d.expectations.indexOf('suivi') !== -1 && !d.contact) {
+      return ['contact', 'Pour être informé·e de l’avancement, indiquez un moyen de contact dans la rubrique 1.'];
+    }
+    if (d.dateFrom && d.dateTo && d.dateTo < d.dateFrom) return ['dateTo', 'La fin de la période est antérieure à son début.'];
     return null;
   }
 
-  function showDone(ref) {
+  function frDate(iso) { var p = iso.split('-'); return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : iso; }
+
+  // Copie lisible de la déclaration, gardée en mémoire uniquement pour le bouton de téléchargement
+  function textCopy(d, ref) {
+    var labels = {};
+    Array.prototype.forEach.call(form.querySelectorAll('input[type=checkbox][value], input[type=radio]'), function (i) {
+      labels[i.name + ':' + i.value] = i.parentNode.textContent.trim().replace(/\s*\(.*\)$/, '');
+    });
+    function list(name, arr) { return arr.map(function (v) { return labels[name + ':' + v]; }).join(', '); }
+    var lines = [
+      'Déclaration anonyme — dossier ' + ref,
+      '',
+      ['Nom ou pseudonyme', d.name], ['Contact', d.contact],
+      ['Qualité du déclarant', list('roles', d.roles) + (d.rolesOther ? ' (' + d.rolesOther + ')' : '')],
+      ['Objet', list('subjects', d.subjects) + (d.subjectsOther ? ' (' + d.subjectsOther + ')' : '')],
+      ['Motif de discrimination', d.discriminationGround], ['Précisions', d.subjectDetails],
+      ['Description des faits', d.description],
+      ['Période', [d.dateFrom, d.dateTo].filter(Boolean).map(frDate).join(' → ')], ['Lieu ou service', d.place],
+      ['Fréquence', list('frequency', d.frequency ? [d.frequency] : [])], ['Heure habituelle', d.usualTime],
+      ['Personne mise en cause', d.accusedName], ['Service / établissement', d.accusedService],
+      ['Lien hiérarchique', list('hierarchy', d.hierarchy ? [d.hierarchy] : [])],
+      ['Témoins', d.evidenceWitnesses], ['Écrits et enregistrements', d.evidenceDocuments], ['Éléments médicaux', d.evidenceMedical],
+      ['Démarches entreprises', list('steps', d.steps) + (d.stepsOther ? ' (' + d.stepsOther + ')' : '')],
+      ['Attentes', list('expectations', d.expectations) + (d.expectationsOther ? ' (' + d.expectationsOther + ')' : '')],
+      ['Situation urgente', list('urgent', d.urgent ? [d.urgent] : [])]
+    ];
+    return lines.map(function (l) {
+      if (typeof l === 'string') return l;
+      return l[1] ? l[0] + ' : ' + l[1] : null;
+    }).filter(function (l) { return l !== null; }).join('\n');
+  }
+
+  $('download').addEventListener('click', function () {
+    if (!lastCopy) return;
+    var url = URL.createObjectURL(new Blob([lastCopy], { type: 'text/plain;charset=utf-8' }));
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'declaration-' + $('ref').textContent + '.txt';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  });
+
+  function showDone(ref, d) {
+    lastCopy = textCopy(d, ref);
     $('intro').hidden = true;
     form.hidden = true;
     form.reset();
@@ -139,11 +210,11 @@
       });
       var out = await res.json();
       if (!out || !out.ok) throw new Error((out && out.error) || '');
-      showDone(out.ref);
+      showDone(out.ref, d);
     } catch (err) {
       error.textContent = (err && err.message) ? err.message : 'L’envoi n’a pas abouti. Vérifiez votre connexion et réessayez.';
       send.disabled = false;
-      send.textContent = 'Envoyer le signalement';
+      send.textContent = 'Envoyer la déclaration';
     }
   });
 })();

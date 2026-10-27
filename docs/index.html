@@ -6,7 +6,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self'; connect-src https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex, nofollow">
-<title>Faire un signalement — 2CGroup</title>
+<title>Formulaire de déclaration anonyme — 2CGroup</title>
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/config.js" defer></script>
 <script src="assets/app.js" defer></script>
@@ -16,35 +16,42 @@
   <img class="logo" src="assets/logo.png" alt="2CGroup" width="120" height="56">
 
   <section id="intro">
-    <h1>Faire un signalement</h1>
-    <p class="lead">Vous avez été témoin ou victime de faits graves au sein du groupe&nbsp;: harcèlement, discrimination, fraude, mise en danger… Ce formulaire transmet votre signalement directement aux personnes chargées de le traiter, sans vous identifier.</p>
+    <h1>Formulaire de déclaration anonyme</h1>
+    <p class="kicker">Harcèlement, discrimination, violences au travail</p>
+
+    <div class="notice">
+      <p><strong>Ce formulaire est destiné à recueillir un signalement de manière confidentielle.</strong></p>
+      <p>Aucune rubrique n’est obligatoire&nbsp;: vous pouvez laisser vide tout ce que vous ne souhaitez pas renseigner. Écrivez uniquement ce que vous souhaitez transmettre, sans mentionner votre nom, votre poste ni aucun élément permettant de vous identifier.</p>
+      <p>Les informations transmises sont traitées uniquement par les personnes habilitées à recevoir et à instruire les signalements. Les éléments de contexte matériels (service, dates, faits) sont indispensables pour permettre l’ouverture d’une enquête&nbsp;; l’identité de la personne déclarante ne l’est pas.</p>
+      <p class="warn"><strong>Attention&nbsp;:</strong> si aucune information ne permet d’identifier la situation décrite (service, dates, faits précis), le signalement pourra ne pas être exploitable.</p>
+    </div>
 
     <div class="ledger">
       <div>
         <h2 class="ledger-title">Ce que nous recevons</h2>
         <ul>
-          <li>Le texte que vous écrivez</li>
+          <li>Uniquement ce que vous écrivez</li>
           <li>Le jour d’envoi, sans l’heure</li>
-          <li>Un contact, seulement si vous en laissez un</li>
         </ul>
       </div>
       <div>
         <h2 class="ledger-title">Ce que nous ne recevons jamais</h2>
         <ul>
-          <li>Votre nom ou votre compte Google</li>
+          <li>Votre compte Google ou votre adresse e-mail professionnelle</li>
           <li>Votre adresse IP ou votre appareil</li>
-          <li>Une copie conservée du formulaire</li>
         </ul>
       </div>
     </div>
+
+    <p class="urgent-line">Ce formulaire n’est pas adapté aux urgences. En cas de danger immédiat, appelez le 112.</p>
 
     <details>
       <summary>Protéger au mieux votre anonymat</summary>
       <ul>
         <li>Inutile de vous déconnecter de votre compte Google&nbsp;: ce formulaire n’envoie aucun cookie et ne peut pas savoir qui vous êtes.</li>
         <li>Les réseaux et ordinateurs de l’entreprise peuvent garder une trace des sites visités. Si vous le pouvez, utilisez un appareil personnel, en 4G ou sur votre wifi personnel.</li>
-        <li>Évitez les détails qui vous désigneraient indirectement («&nbsp;lors de mon entretien annuel de mardi…&nbsp;»), sauf s’ils sont nécessaires.</li>
-        <li>Si vous souhaitez une réponse, créez une adresse e-mail dédiée, sans votre nom, plutôt que d’utiliser votre adresse professionnelle.</li>
+        <li>Évitez les détails qui vous désigneraient indirectement, sauf s’ils sont nécessaires.</li>
+        <li>Pour être recontacté·e, préférez un pseudonyme et une adresse e-mail créée pour l’occasion.</li>
       </ul>
     </details>
   </section>
@@ -60,73 +67,174 @@
   </form>
 
   <form id="report" novalidate hidden autocomplete="off">
+
     <fieldset>
-      <legend><span class="step">Étape 1 sur 3</span><span class="h2">Le contexte</span></legend>
+      <legend><span class="h2">1. Identification (facultatif)</span>
+        <span class="hint">Ces informations ne sont pas nécessaires à la recevabilité de votre déclaration. Elles permettent uniquement de vous recontacter si vous le souhaitez.</span></legend>
       <div class="field">
-        <label for="entity">Entité concernée</label>
-        <select id="entity" name="entity" required>
-          <option value="">Choisir…</option>
-          <option>2CGroup (holding)</option>
-          <option>2CFinance</option>
-          <option>R4Innov</option>
-          <option>HR4Team</option>
-          <option>iytro</option>
-          <option>Collectively.life</option>
-          <option>Argura</option>
-          <option>Je ne sais pas / plusieurs</option>
-        </select>
+        <label for="name">Nom ou pseudonyme</label>
+        <input type="text" id="name" name="name" maxlength="120" autocomplete="off">
       </div>
       <div class="field">
-        <label for="category">Type de faits</label>
-        <select id="category" name="category" required>
-          <option value="">Choisir…</option>
-          <option>Harcèlement moral</option>
-          <option>Harcèlement sexuel ou agissement sexiste</option>
-          <option>Discrimination</option>
-          <option>Atteinte à la santé ou à la sécurité</option>
-          <option>Fraude, corruption ou conflit d’intérêts</option>
-          <option>Atteinte à l’environnement</option>
-          <option>Autre manquement à la loi ou au règlement intérieur</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="period">Quand les faits se sont-ils produits&nbsp;? <span class="opt">(facultatif)</span></label>
-        <input type="text" id="period" name="period" autocomplete="off" maxlength="300" placeholder="Par exemple&nbsp;: depuis septembre, de façon répétée">
+        <label for="contact">Adresse e-mail ou moyen de contact</label>
+        <p class="help">Si vous acceptez d’être recontacté·e. Préférez une adresse personnelle ou créée pour l’occasion.</p>
+        <input type="text" id="contact" name="contact" maxlength="200" autocomplete="off">
       </div>
     </fieldset>
 
     <fieldset>
-      <legend><span class="step">Étape 2 sur 3</span><span class="h2">Les faits</span>
-        <span class="hint">Décrivez ce qui s’est passé, le plus précisément possible&nbsp;: où, comment, à quelle fréquence.</span></legend>
+      <legend><span class="h2">2. À quel titre effectuez-vous cette déclaration&nbsp;?</span></legend>
+      <div class="checks">
+        <label class="check"><input type="checkbox" name="roles" value="concerne"><span>J’ai été personnellement concerné·e par les faits</span></label>
+        <label class="check"><input type="checkbox" name="roles" value="temoin"><span>J’ai été témoin direct des faits</span></label>
+        <label class="check"><input type="checkbox" name="roles" value="indirect"><span>Je transmets des éléments dont j’ai eu connaissance indirectement</span></label>
+        <label class="check"><input type="checkbox" name="roles" value="autre"><span>Autre</span></label>
+        <input type="text" class="other" name="rolesOther" maxlength="300" aria-label="Préciser l’autre qualité" placeholder="Préciser" autocomplete="off">
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend><span class="h2">3. Objet de la déclaration</span></legend>
+      <div class="checks">
+        <label class="check"><input type="checkbox" name="subjects" value="harcelement_moral"><span>Harcèlement moral</span></label>
+        <label class="check"><input type="checkbox" name="subjects" value="harcelement_sexuel"><span>Harcèlement sexuel</span></label>
+        <label class="check"><input type="checkbox" name="subjects" value="discrimination"><span>Discrimination</span></label>
+        <label class="check"><input type="checkbox" name="subjects" value="violences"><span>Violences physiques ou verbales</span></label>
+        <label class="check"><input type="checkbox" name="subjects" value="autre"><span>Autre</span></label>
+        <input type="text" class="other" name="subjectsOther" maxlength="300" aria-label="Préciser l’autre objet" placeholder="Préciser" autocomplete="off">
+      </div>
       <div class="field">
-        <label for="description">Description des faits</label>
-        <textarea id="description" name="description" autocomplete="off" maxlength="10000" required></textarea>
+        <label for="discriminationGround">Motif de discrimination, si applicable</label>
+        <p class="help">Âge, sexe, origine, handicap, religion, situation de famille, orientation sexuelle, opinions, état de santé…</p>
+        <input type="text" id="discriminationGround" name="discriminationGround" maxlength="300" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="subjectDetails">Précisions</label>
+        <textarea id="subjectDetails" name="subjectDetails" maxlength="2000" autocomplete="off"></textarea>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend><span class="h2">4. Description des faits</span>
+        <span class="hint">Décrivez les faits de la manière la plus précise possible, de votre point de vue, sans interprétation&nbsp;: ce qui s’est passé, comment, à quelle fréquence.</span></legend>
+      <div class="field">
+        <label for="description" class="sr-only">Description des faits</label>
+        <textarea id="description" name="description" maxlength="10000" autocomplete="off"></textarea>
         <div class="counter"><span id="count">0</span> / 10&nbsp;000</div>
       </div>
-      <div class="field">
-        <label for="people">Personnes impliquées <span class="opt">(facultatif)</span></label>
-        <p class="help">Auteur(s) présumé(s), témoins éventuels.</p>
-        <textarea id="people" name="people" autocomplete="off" maxlength="3000"></textarea>
+    </fieldset>
+
+    <fieldset>
+      <legend><span class="h2">5. Dates, lieux et fréquence</span></legend>
+      <div class="grid2">
+        <div class="field">
+          <label for="dateFrom">Date des faits, ou début de la période</label>
+          <input type="date" id="dateFrom" name="dateFrom" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="dateTo">Fin de la période <span class="opt">(si plusieurs jours)</span></label>
+          <input type="date" id="dateTo" name="dateTo" autocomplete="off">
+        </div>
       </div>
       <div class="field">
-        <label for="evidence">Éléments dont vous disposez <span class="opt">(facultatif)</span></label>
-        <p class="help">Décrivez-les sans les joindre (messages, e-mails, documents…). Ils pourront vous être demandés si vous laissez un contact.</p>
-        <textarea id="evidence" name="evidence" autocomplete="off" maxlength="3000"></textarea>
+        <label for="place">Lieu ou service concerné</label>
+        <input type="text" id="place" name="place" maxlength="300" autocomplete="off">
+      </div>
+      <div class="field">
+        <span class="label">Fréquence</span>
+        <div class="radios">
+          <label class="check"><input type="radio" name="frequency" value="isole"><span>Fait isolé</span></label>
+          <label class="check"><input type="radio" name="frequency" value="repete"><span>Répété</span></label>
+          <label class="check"><input type="radio" name="frequency" value="quotidien"><span>Quotidien</span></label>
+        </div>
+      </div>
+      <div class="field">
+        <label for="usualTime">Heure habituelle, si pertinent</label>
+        <input type="text" id="usualTime" name="usualTime" maxlength="100" autocomplete="off">
       </div>
     </fieldset>
 
     <fieldset>
-      <legend><span class="step">Étape 3 sur 3</span><span class="h2">Recevoir une réponse</span>
-        <span class="hint">Sans contact, votre signalement sera traité, mais nous ne pourrons ni vous répondre ni vous poser de questions.</span></legend>
+      <legend><span class="h2">6. Personne(s) mise(s) en cause</span>
+        <span class="hint">Ne renseignez pas de nom si vous ne le souhaitez pas&nbsp;: une fonction ou un service suffit souvent à lancer les vérifications.</span></legend>
       <div class="field">
-        <label for="contact">Adresse e-mail pour vous répondre <span class="opt">(facultatif)</span></label>
-        <input type="email" id="contact" name="contact" maxlength="200" autocomplete="off" placeholder="Une adresse personnelle ou créée pour l’occasion">
+        <label for="accusedName">Nom ou fonction</label>
+        <input type="text" id="accusedName" name="accusedName" maxlength="300" autocomplete="off">
       </div>
       <div class="field">
-        <label class="check" for="goodFaith">
-          <input type="checkbox" id="goodFaith" name="goodFaith" required>
-          <span>Je signale ces faits de bonne foi et sans contrepartie financière directe.</span>
-        </label>
+        <label for="accusedService">Service / établissement</label>
+        <input type="text" id="accusedService" name="accusedService" maxlength="300" autocomplete="off">
+      </div>
+      <div class="field">
+        <span class="label">Lien hiérarchique avec la personne concernée</span>
+        <div class="radios">
+          <label class="check"><input type="radio" name="hierarchy" value="oui"><span>Oui</span></label>
+          <label class="check"><input type="radio" name="hierarchy" value="non"><span>Non</span></label>
+          <label class="check"><input type="radio" name="hierarchy" value="collegue"><span>Collègue</span></label>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend><span class="h2">7. Témoins et éléments matériels</span>
+        <span class="hint">Décrivez-les sans les joindre. Ils pourront vous être demandés si vous laissez un contact.</span></legend>
+      <div class="field">
+        <label class="check"><input type="checkbox" name="evidence" value="temoins"><span>Témoins directs (nombre, fonction, sans nom obligatoire)</span></label>
+        <input type="text" class="other" name="evidenceWitnesses" maxlength="1000" aria-label="Précisions sur les témoins" placeholder="Précisions" autocomplete="off">
+      </div>
+      <div class="field">
+        <label class="check"><input type="checkbox" name="evidence" value="ecrits"><span>Écrits, courriels, messages, photographies, enregistrements</span></label>
+        <input type="text" class="other" name="evidenceDocuments" maxlength="1000" aria-label="Précisions sur les écrits et enregistrements" placeholder="Précisions" autocomplete="off">
+      </div>
+      <div class="field">
+        <label class="check"><input type="checkbox" name="evidence" value="medical"><span>Comptes rendus médicaux ou arrêts de travail</span></label>
+        <input type="text" class="other" name="evidenceMedical" maxlength="1000" aria-label="Précisions sur les éléments médicaux" placeholder="Précisions" autocomplete="off">
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend><span class="h2">8. Démarches déjà entreprises</span></legend>
+      <div class="checks">
+        <label class="check"><input type="checkbox" name="steps" value="aucune"><span>Aucune démarche à ce jour</span></label>
+        <label class="check"><input type="checkbox" name="steps" value="hierarchie"><span>Alerte ou information de la hiérarchie</span></label>
+        <label class="check"><input type="checkbox" name="steps" value="cse"><span>Saisine des représentants du personnel / CSE</span></label>
+        <label class="check"><input type="checkbox" name="steps" value="inspection"><span>Déclaration à l’inspection du travail</span></label>
+        <label class="check"><input type="checkbox" name="steps" value="plainte"><span>Dépôt de plainte ou de main courante</span></label>
+        <label class="check"><input type="checkbox" name="steps" value="medecin"><span>Consultation du médecin du travail</span></label>
+        <label class="check"><input type="checkbox" name="steps" value="autre"><span>Autre</span></label>
+        <input type="text" class="other" name="stepsOther" maxlength="300" aria-label="Préciser l’autre démarche" placeholder="Préciser" autocomplete="off">
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend><span class="h2">9. Ce que vous attendez de la suite donnée</span></legend>
+      <div class="checks">
+        <label class="check"><input type="checkbox" name="expectations" value="enquete"><span>Une enquête interne</span></label>
+        <label class="check"><input type="checkbox" name="expectations" value="protection"><span>Une mesure de protection ou de mise à distance</span></label>
+        <label class="check"><input type="checkbox" name="expectations" value="mediation"><span>Une médiation</span></label>
+        <label class="check"><input type="checkbox" name="expectations" value="enregistrement"><span>Un simple enregistrement du signalement</span></label>
+        <label class="check"><input type="checkbox" name="expectations" value="suivi" id="expectFollowUp"><span>Être informé·e de l’avancement (un moyen de contact est alors nécessaire, rubrique 1)</span></label>
+        <label class="check"><input type="checkbox" name="expectations" value="autre"><span>Autre</span></label>
+        <input type="text" class="other" name="expectationsOther" maxlength="300" aria-label="Préciser l’autre attente" placeholder="Préciser" autocomplete="off">
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend><span class="h2">10. Situation urgente&nbsp;?</span></legend>
+      <div class="radios">
+        <label class="check"><input type="radio" name="urgent" value="oui"><span>Oui, risque immédiat pour la santé ou la sécurité d’une personne</span></label>
+        <label class="check"><input type="radio" name="urgent" value="non"><span>Non</span></label>
+      </div>
+      <div class="alert" id="urgentInfo" hidden role="alert">
+        <p><strong>Ce formulaire n’est pas traité en temps réel</strong>&nbsp;: les signalements sont transmis une fois par jour. Signalez la situation sans délai par un autre canal&nbsp;: un responsable, les ressources humaines ou le médecin du travail. En cas de danger immédiat, appelez le 112 (ou le 15 pour le SAMU, le 17 pour la police).</p>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend><span class="h2">11. Déclaration du déclarant</span></legend>
+      <div class="checks">
+        <label class="check"><input type="checkbox" id="certifyAccurate" name="certifyAccurate"><span>Je certifie que les informations transmises sont exactes et sincères à ma connaissance.</span></label>
+        <label class="check"><input type="checkbox" id="certifyInformed" name="certifyInformed"><span>Je suis informé·e que ce formulaire peut être transmis aux personnes chargées du traitement des signalements au sein de l’organisme.</span></label>
       </div>
       <div class="hp" aria-hidden="true">
         <label for="website">Ne pas remplir</label>
@@ -134,21 +242,26 @@
       </div>
     </fieldset>
 
-    <button type="submit" id="send">Envoyer le signalement</button>
+    <button type="submit" id="send">Envoyer la déclaration</button>
     <p class="error" id="error" role="alert"></p>
   </form>
 
   <section id="done" hidden aria-live="polite">
-    <h1>Signalement envoyé</h1>
-    <p class="lead">Il sera transmis aux personnes chargées de le traiter dans les 24&nbsp;heures. Notez cette référence&nbsp;: elle vous permettra de compléter votre signalement plus tard en la mentionnant dans un nouvel envoi.</p>
+    <h1>Déclaration envoyée</h1>
+    <p class="lead">Elle sera transmise aux personnes chargées de la traiter dans les 24&nbsp;heures. Notez ce numéro de dossier&nbsp;: il vous permettra de compléter votre déclaration plus tard en le mentionnant dans un nouvel envoi.</p>
     <p class="ref" id="ref"></p>
-    <p>Vous pouvez maintenant fermer cette page.</p>
+    <div class="copy">
+      <p>Vous pouvez conserver une copie de votre déclaration. Attention&nbsp;: ce fichier restera sur l’appareil utilisé. Évitez de l’enregistrer sur un ordinateur professionnel ou partagé.</p>
+      <button type="button" id="download" class="secondary">Télécharger une copie</button>
+    </div>
+    <p>Vous pouvez ensuite fermer cette page.</p>
   </section>
 
   <footer>
-    Dispositif d’alerte interne 2CGroup. Les signalements sont traités de manière strictement confidentielle, conformément à la loi Sapin&nbsp;II modifiée. Le code source de cette page est public et vérifiable.
+    <p>Les données recueillies font l’objet d’un traitement destiné exclusivement à la prévention et au traitement des situations de harcèlement et de discrimination. Vous disposez d’un droit d’accès, de rectification et d’effacement, que vous pouvez exercer auprès du comité d’éthique.</p>
+    <p>Dispositif d’alerte interne 2CGroup. Le code source de cette page est public et vérifiable.</p>
   </footer>
 </main>
-<noscript><p class="noscript">Ce formulaire nécessite JavaScript pour chiffrer et transmettre votre signalement.</p></noscript>
+<noscript><p class="noscript">Ce formulaire nécessite JavaScript pour chiffrer et transmettre votre déclaration.</p></noscript>
 </body>
 </html>
