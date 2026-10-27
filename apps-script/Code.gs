@@ -38,12 +38,12 @@ const CONFIG = {
   ],
   DIGEST_HOUR: 8,                 // heure de l'envoi groupé quotidien (Europe/Paris)
   MAX_PER_HOUR: 30,               // signalements acceptés par heure, tous utilisateurs confondus
-  MAX_FAILED_CODES_PER_HOUR: 100, // tentatives de code erronées avant blocage temporaire
   MAX_BODY_CHARS: 40000,
   LIMITS: { description: 10000, short: 300, medium: 3000, contact: 200 },
 };
 
 const PROP_CODE = 'ACCESS_CODE';
+const CODE_LENGTH = 12;          // 12 caractères parmi 32 : environ 60 bits, hors de portée d'une attaque par force brute
 const QUEUE_PREFIX = 'q|';
 const CHUNK_CHARS = 2500;        // une propriété est limitée à 9 Ko
 const QUEUE_MAX_BYTES = 350000;  // stockage total limité à 500 Ko : au-delà, envoi intermédiaire
@@ -59,13 +59,21 @@ function doGet() {
 function doPost(e) {
   try {
     const raw = (e && e.postData && e.postData.contents) || '';
-    if (raw.length > CONFIG.MAX_BODY_CHARS) throw new Error('Le signalement est trop long.');
+    if (raw.length > CONFIG.MAX_BODY_CHARS) throw userError_('Le signalement est trop long.');
     let form;
-    try { form = JSON.parse(raw); } catch (err) { throw new Error('Requête invalide.'); }
+    try { form = JSON.parse(raw); } catch (err) { throw userError_('Requête invalide.'); }
     return json_(submitReport_(form));
   } catch (err) {
-    return json_({ ok: false, error: String(err && err.message || err) });
+    // Seuls les messages prévus pour l'utilisateur sont renvoyés ; les erreurs internes restent génériques.
+    const msg = err && err.userFacing ? err.message : 'Le signalement n’a pas pu être enregistré. Réessayez plus tard.';
+    return json_({ ok: false, error: msg });
   }
+}
+
+function userError_(message) {
+  const e = new Error(message);
+  e.userFacing = true;
+  return e;
 }
 
 function json_(obj) {
@@ -76,7 +84,7 @@ function json_(obj) {
 
 function setup() {
   const props = PropertiesService.getScriptProperties();
-  if (!props.getProperty(PROP_CODE)) props.setProperty(PROP_CODE, randomString_(8));
+  if (!props.getProperty(PROP_CODE)) props.setProperty(PROP_CODE, randomString_(CODE_LENGTH));
 
   ScriptApp.getProjectTriggers()
     .filter(function (t) { return t.getHandlerFunction() === 'sendDigest'; })
@@ -95,7 +103,7 @@ function showAccessCode() {
 }
 
 function rotateAccessCode() {
-  PropertiesService.getScriptProperties().setProperty(PROP_CODE, randomString_(8));
+  PropertiesService.getScriptProperties().setProperty(PROP_CODE, randomString_(CODE_LENGTH));
   console.log('Nouveau code généré. L’ancien ne fonctionne plus.');
   console.log('À faire maintenant : rechiffrer l’URL avec tools/chiffrer-url.mjs et publier la page.');
   showAccessCode();
@@ -110,28 +118,23 @@ function submitReport_(form) {
   const cache = CacheService.getScriptCache();
   const hour = Utilities.formatDate(new Date(), TZ, 'yyyyMMddHH');
 
-  // 1. Code d'accès
-  const failKey = 'fail_' + hour;
-  const fails = Number(cache.get(failKey) || 0);
-  if (fails >= CONFIG.MAX_FAILED_CODES_PER_HOUR) {
-    throw new Error('Le formulaire est temporairement indisponible. Réessayez dans une heure.');
-  }
+  // 1. Code d'accès. Un code faux est toujours refusé, mais les tentatives ratées
+  //    ne bloquent jamais les envois avec le bon code (pas de déni de service possible).
   const expected = PropertiesService.getScriptProperties().getProperty(PROP_CODE) || '';
   const given = normalizeCode_(form && form.accessCode);
   if (!expected || !safeEqual_(given, expected)) {
-    cache.put(failKey, String(fails + 1), 3600);
-    throw new Error('Code d’accès incorrect ou expiré. Rechargez la page et saisissez le code en vigueur.');
+    throw userError_('Code d’accès incorrect ou expiré. Rechargez la page et saisissez le code en vigueur.');
   }
 
   // 2. Contenu
   const data = validate_(form);
-  if (data.error) throw new Error(data.error);
+  if (data.error) throw userError_(data.error);
 
   // 3. Limite globale
   const rateKey = 'rate_' + hour;
   const count = Number(cache.get(rateKey) || 0);
   if (count >= CONFIG.MAX_PER_HOUR) {
-    throw new Error('Trop de signalements ont été envoyés cette heure-ci. Réessayez un peu plus tard.');
+    throw userError_('Trop de signalements ont été envoyés cette heure-ci. Réessayez un peu plus tard.');
   }
   cache.put(rateKey, String(count + 1), 3600);
 
@@ -244,7 +247,7 @@ function makeRef_() {
   return s.slice(0, 3) + '-' + s.slice(3); // ex. A7K-3QX9
 }
 
-function formatCode_(c) { return c.slice(0, 4) + '-' + c.slice(4); }
+function formatCode_(c) { return c.match(/.{1,4}/g).join('-'); }
 
 function normalizeCode_(c) { return String(c || '').toUpperCase().replace(/[\s-]/g, ''); }
 

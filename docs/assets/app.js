@@ -10,6 +10,12 @@
 (function () {
   'use strict';
 
+  // Anti-clickjacking : la page refuse de fonctionner si un autre site l'affiche dans un cadre.
+  if (window.top !== window.self) {
+    document.body.textContent = 'Pour votre sécurité, ouvrez ce formulaire directement à son adresse officielle.';
+    return;
+  }
+
   var cfg = window.SIGNALEMENT_CONFIG || null;
   var ENDPOINT_PATTERN = /^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/;
   var endpoint = null;

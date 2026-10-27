@@ -48,8 +48,8 @@ if (!ENDPOINT_PATTERN.test(url)) {
   rl.close(); process.exit(1);
 }
 const code = normalizeCode(await ask('Code d’accès (affiché par showAccessCode) : ', true));
-if (code.length < 8) {
-  console.error('Code trop court : utilisez le code généré par le script (8 caractères).');
+if (code.length < 12) {
+  console.error('Code trop court : utilisez le code généré par le script (12 caractères).');
   rl.close(); process.exit(1);
 }
 
