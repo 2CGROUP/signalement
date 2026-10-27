@@ -1,0 +1,7 @@
+# Aucun secret ne doit jamais être versionné dans ce dépôt public
+.env
+.env.*
+*.secret
+*.local.*
+node_modules/
+.DS_Store

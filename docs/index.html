@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self'; connect-src https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow">
+<title>Faire un signalement — 2CGroup</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/config.js" defer></script>
+<script src="assets/app.js" defer></script>
+</head>
+<body>
+<main>
+  <img class="logo" src="assets/logo.png" alt="2CGroup" width="120" height="56">
+
+  <section id="intro">
+    <h1>Faire un signalement</h1>
+    <p class="lead">Vous avez été témoin ou victime de faits graves au sein du groupe&nbsp;: harcèlement, discrimination, fraude, mise en danger… Ce formulaire transmet votre signalement directement aux personnes chargées de le traiter, sans vous identifier.</p>
+
+    <div class="ledger">
+      <div>
+        <h2 class="ledger-title">Ce que nous recevons</h2>
+        <ul>
+          <li>Le texte que vous écrivez</li>
+          <li>Le jour d’envoi, sans l’heure</li>
+          <li>Un contact, seulement si vous en laissez un</li>
+        </ul>
+      </div>
+      <div>
+        <h2 class="ledger-title">Ce que nous ne recevons jamais</h2>
+        <ul>
+          <li>Votre nom ou votre compte Google</li>
+          <li>Votre adresse IP ou votre appareil</li>
+          <li>Une copie conservée du formulaire</li>
+        </ul>
+      </div>
+    </div>
+
+    <details>
+      <summary>Protéger au mieux votre anonymat</summary>
+      <ul>
+        <li>Inutile de vous déconnecter de votre compte Google&nbsp;: ce formulaire n’envoie aucun cookie et ne peut pas savoir qui vous êtes.</li>
+        <li>Les réseaux et ordinateurs de l’entreprise peuvent garder une trace des sites visités. Si vous le pouvez, utilisez un appareil personnel, en 4G ou sur votre wifi personnel.</li>
+        <li>Évitez les détails qui vous désigneraient indirectement («&nbsp;lors de mon entretien annuel de mardi…&nbsp;»), sauf s’ils sont nécessaires.</li>
+        <li>Si vous souhaitez une réponse, créez une adresse e-mail dédiée, sans votre nom, plutôt que d’utiliser votre adresse professionnelle.</li>
+      </ul>
+    </details>
+  </section>
+
+  <form id="gate" class="gate" novalidate>
+    <label for="accessCode">Code d’accès</label>
+    <p class="help">Il figure dans l’espace Notion du groupe. Il est le même pour tout le monde et ne permet pas de vous identifier.</p>
+    <div class="gate-row">
+      <input type="text" id="accessCode" name="accessCode" maxlength="20" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX" required>
+      <button type="submit" id="unlock">Accéder au formulaire</button>
+    </div>
+    <p class="error" id="gateError" role="alert"></p>
+  </form>
+
+  <form id="report" novalidate hidden>
+    <fieldset>
+      <legend><span class="step">Étape 1 sur 3</span><span class="h2">Le contexte</span></legend>
+      <div class="field">
+        <label for="entity">Entité concernée</label>
+        <select id="entity" name="entity" required>
+          <option value="">Choisir…</option>
+          <option>2CGroup (holding)</option>
+          <option>2CFinance</option>
+          <option>R4Innov</option>
+          <option>HR4Team</option>
+          <option>iytro</option>
+          <option>Collectively.life</option>
+          <option>Argura</option>
+          <option>Je ne sais pas / plusieurs</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="category">Type de faits</label>
+        <select id="category" name="category" required>
+          <option value="">Choisir…</option>
+          <option>Harcèlement moral</option>
+          <option>Harcèlement sexuel ou agissement sexiste</option>
+          <option>Discrimination</option>
+          <option>Atteinte à la santé ou à la sécurité</option>
+          <option>Fraude, corruption ou conflit d’intérêts</option>
+          <option>Atteinte à l’environnement</option>
+          <option>Autre manquement à la loi ou au règlement intérieur</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="period">Quand les faits se sont-ils produits&nbsp;? <span class="opt">(facultatif)</span></label>
+        <input type="text" id="period" name="period" maxlength="300" placeholder="Par exemple&nbsp;: depuis septembre, de façon répétée">
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend><span class="step">Étape 2 sur 3</span><span class="h2">Les faits</span>
+        <span class="hint">Décrivez ce qui s’est passé, le plus précisément possible&nbsp;: où, comment, à quelle fréquence.</span></legend>
+      <div class="field">
+        <label for="description">Description des faits</label>
+        <textarea id="description" name="description" maxlength="10000" required></textarea>
+        <div class="counter"><span id="count">0</span> / 10&nbsp;000</div>
+      </div>
+      <div class="field">
+        <label for="people">Personnes impliquées <span class="opt">(facultatif)</span></label>
+        <p class="help">Auteur(s) présumé(s), témoins éventuels.</p>
+        <textarea id="people" name="people" maxlength="3000"></textarea>
+      </div>
+      <div class="field">
+        <label for="evidence">Éléments dont vous disposez <span class="opt">(facultatif)</span></label>
+        <p class="help">Décrivez-les sans les joindre (messages, e-mails, documents…). Ils pourront vous être demandés si vous laissez un contact.</p>
+        <textarea id="evidence" name="evidence" maxlength="3000"></textarea>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend><span class="step">Étape 3 sur 3</span><span class="h2">Recevoir une réponse</span>
+        <span class="hint">Sans contact, votre signalement sera traité, mais nous ne pourrons ni vous répondre ni vous poser de questions.</span></legend>
+      <div class="field">
+        <label for="contact">Adresse e-mail pour vous répondre <span class="opt">(facultatif)</span></label>
+        <input type="email" id="contact" name="contact" maxlength="200" autocomplete="off" placeholder="Une adresse personnelle ou créée pour l’occasion">
+      </div>
+      <div class="field">
+        <label class="check" for="goodFaith">
+          <input type="checkbox" id="goodFaith" name="goodFaith" required>
+          <span>Je signale ces faits de bonne foi et sans contrepartie financière directe.</span>
+        </label>
+      </div>
+      <div class="hp" aria-hidden="true">
+        <label for="website">Ne pas remplir</label>
+        <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+      </div>
+    </fieldset>
+
+    <button type="submit" id="send">Envoyer le signalement</button>
+    <p class="error" id="error" role="alert"></p>
+  </form>
+
+  <section id="done" hidden aria-live="polite">
+    <h1>Signalement envoyé</h1>
+    <p class="lead">Il sera transmis aux personnes chargées de le traiter dans les 24&nbsp;heures. Notez cette référence&nbsp;: elle vous permettra de compléter votre signalement plus tard en la mentionnant dans un nouvel envoi.</p>
+    <p class="ref" id="ref"></p>
+    <p>Vous pouvez maintenant fermer cette page.</p>
+  </section>
+
+  <footer>
+    Dispositif d’alerte interne 2CGroup. Les signalements sont traités de manière strictement confidentielle, conformément à la loi Sapin&nbsp;II modifiée. Le code source de cette page est public et vérifiable.
+  </footer>
+</main>
+<noscript><p class="noscript">Ce formulaire nécessite JavaScript pour chiffrer et transmettre votre signalement.</p></noscript>
+</body>
+</html>
