@@ -34,7 +34,7 @@ const CONFIG = {
     roles: { concerne: 'Personnellement concerné·e par les faits', temoin: 'Témoin direct des faits', indirect: 'Connaissance indirecte des faits', autre: 'Autre' },
     subjects: { harcelement_moral: 'Harcèlement moral', harcelement_sexuel: 'Harcèlement sexuel', discrimination: 'Discrimination', violences: 'Violences physiques ou verbales', autre: 'Autre' },
     frequency: { isole: 'Fait isolé', repete: 'Répété', quotidien: 'Quotidien' },
-    hierarchy: { oui: 'Oui', non: 'Non', collegue: 'Collègue' },
+    hierarchy: { oui: 'Oui', non: 'Non', collegue: 'Collègue', autre: 'Autre' },
     evidence: { temoins: 'Témoins directs', ecrits: 'Écrits, courriels, messages, photos, enregistrements', medical: 'Comptes rendus médicaux ou arrêts de travail' },
     steps: { aucune: 'Aucune démarche à ce jour', hierarchie: 'Alerte ou information de la hiérarchie', cse: 'Saisine des représentants du personnel / CSE', inspection: 'Déclaration à l’inspection du travail', plainte: 'Dépôt de plainte ou de main courante', medecin: 'Consultation du médecin du travail', autre: 'Autre' },
     expectations: { enquete: 'Une enquête interne', protection: 'Une mesure de protection ou de mise à distance', mediation: 'Une médiation', enregistrement: 'Un simple enregistrement du signalement', suivi: 'Être informé·e de l’avancement', autre: 'Autre' },
@@ -271,6 +271,7 @@ function validate_(f) {
     accusedName: clean(f.accusedName, L.short),
     accusedService: clean(f.accusedService, L.short),
     hierarchy: one(f.hierarchy, LI.hierarchy),
+    hierarchyOther: f.hierarchy === 'autre' ? clean(f.hierarchyOther, L.short) : '',
     evidence: list(f.evidence, LI.evidence),
     evidenceWitnesses: clean(f.evidenceWitnesses, L.evidence),
     evidenceDocuments: clean(f.evidenceDocuments, L.evidence),
@@ -289,6 +290,9 @@ function validate_(f) {
   }
   if (d.expectations.indexOf(LI.expectations.suivi) !== -1 && !d.contact) {
     return { error: 'Pour être informé·e de l’avancement, indiquez un moyen de contact dans la rubrique 1.' };
+  }
+  if (!d.certifyAccurate || !d.certifyInformed) {
+    return { error: 'Cochez les deux cases de la rubrique 11 pour envoyer la déclaration.' };
   }
   return d;
 }
@@ -353,7 +357,7 @@ function sections_(d) {
       ['Fréquence', d.frequency], ['Heure habituelle', d.usualTime]]],
     ['6. Personne(s) mise(s) en cause', [
       ['Nom ou fonction', d.accusedName], ['Service / établissement', d.accusedService],
-      ['Lien hiérarchique', d.hierarchy]]],
+      ['Lien hiérarchique', joinOther_(d.hierarchy ? [d.hierarchy] : [], d.hierarchyOther)]]],
     ['7. Témoins et éléments matériels', [
       ['Éléments signalés', d.evidence.join(', ')], ['Témoins', d.evidenceWitnesses],
       ['Écrits, enregistrements', d.evidenceDocuments], ['Éléments médicaux', d.evidenceMedical]]],

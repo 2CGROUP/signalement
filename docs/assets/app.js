@@ -87,6 +87,15 @@
     r.addEventListener('change', function () { $('urgentInfo').hidden = !(r.checked && r.value === 'oui'); });
   });
 
+  // Rubrique 6 : « Autre » ouvre un champ libre pour préciser le lien
+  Array.prototype.forEach.call(document.querySelectorAll('input[name="hierarchy"]'), function (r) {
+    r.addEventListener('change', function () {
+      var other = $('hierarchyOther');
+      other.hidden = !(r.checked && r.value === 'autre');
+      if (!other.hidden) other.focus();
+    });
+  });
+
   function val(name) { var el = form.elements[name]; return el ? String(el.value || '').trim() : ''; }
   function all(name) {
     return Array.prototype.filter.call(form.querySelectorAll('input[name="' + name + '"]'), function (i) { return i.checked; })
@@ -103,8 +112,9 @@
       discriminationGround: val('discriminationGround'), subjectDetails: val('subjectDetails'),
       description: val('description'),
       dateFrom: val('dateFrom'), dateTo: val('dateTo'), place: val('place'),
-      frequency: one('frequency'), usualTime: val('usualTime'),
+      frequency: val('frequency'), usualTime: val('usualTime'),
       accusedName: val('accusedName'), accusedService: val('accusedService'), hierarchy: one('hierarchy'),
+      hierarchyOther: one('hierarchy') === 'autre' ? val('hierarchyOther') : '',
       evidence: all('evidence'), evidenceWitnesses: val('evidenceWitnesses'),
       evidenceDocuments: val('evidenceDocuments'), evidenceMedical: val('evidenceMedical'),
       steps: all('steps'), stepsOther: val('stepsOther'),
@@ -128,6 +138,9 @@
       return ['contact', 'Pour être informé·e de l’avancement, indiquez un moyen de contact dans la rubrique 1.'];
     }
     if (d.dateFrom && d.dateTo && d.dateTo < d.dateFrom) return ['dateTo', 'La fin de la période est antérieure à son début.'];
+    if (!d.certifyAccurate || !d.certifyInformed) {
+      return [d.certifyAccurate ? 'certifyInformed' : 'certifyAccurate', 'Cochez les deux cases de la rubrique 11 pour envoyer la déclaration.'];
+    }
     return null;
   }
 
@@ -138,6 +151,9 @@
     var labels = {};
     Array.prototype.forEach.call(form.querySelectorAll('input[type=checkbox][value], input[type=radio]'), function (i) {
       labels[i.name + ':' + i.value] = i.parentNode.textContent.trim().replace(/\s*\(.*\)$/, '');
+    });
+    Array.prototype.forEach.call(form.querySelectorAll('select option[value]'), function (o) {
+      labels[o.parentNode.name + ':' + o.value] = o.textContent.trim();
     });
     function list(name, arr) { return arr.map(function (v) { return labels[name + ':' + v]; }).join(', '); }
     var lines = [
@@ -151,7 +167,7 @@
       ['Période', [d.dateFrom, d.dateTo].filter(Boolean).map(frDate).join(' → ')], ['Lieu ou service', d.place],
       ['Fréquence', list('frequency', d.frequency ? [d.frequency] : [])], ['Heure habituelle', d.usualTime],
       ['Personne mise en cause', d.accusedName], ['Service / établissement', d.accusedService],
-      ['Lien hiérarchique', list('hierarchy', d.hierarchy ? [d.hierarchy] : [])],
+      ['Lien hiérarchique', list('hierarchy', d.hierarchy ? [d.hierarchy] : []) + (d.hierarchyOther ? ' (' + d.hierarchyOther + ')' : '')],
       ['Témoins', d.evidenceWitnesses], ['Écrits et enregistrements', d.evidenceDocuments], ['Éléments médicaux', d.evidenceMedical],
       ['Démarches entreprises', list('steps', d.steps) + (d.stepsOther ? ' (' + d.stepsOther + ')' : '')],
       ['Attentes', list('expectations', d.expectations) + (d.expectationsOther ? ' (' + d.expectationsOther + ')' : '')],

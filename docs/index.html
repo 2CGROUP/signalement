@@ -141,12 +141,13 @@
         <input type="text" id="place" name="place" maxlength="300" autocomplete="off">
       </div>
       <div class="field">
-        <span class="label">Fréquence</span>
-        <div class="radios">
-          <label class="check"><input type="radio" name="frequency" value="isole"><span>Fait isolé</span></label>
-          <label class="check"><input type="radio" name="frequency" value="repete"><span>Répété</span></label>
-          <label class="check"><input type="radio" name="frequency" value="quotidien"><span>Quotidien</span></label>
-        </div>
+        <label for="frequency">Fréquence</label>
+        <select id="frequency" name="frequency" autocomplete="off">
+          <option value="">Non précisée</option>
+          <option value="isole">Fait isolé</option>
+          <option value="repete">Répété</option>
+          <option value="quotidien">Quotidien</option>
+        </select>
       </div>
       <div class="field">
         <label for="usualTime">Heure habituelle, si pertinent</label>
@@ -171,6 +172,8 @@
           <label class="check"><input type="radio" name="hierarchy" value="oui"><span>Oui</span></label>
           <label class="check"><input type="radio" name="hierarchy" value="non"><span>Non</span></label>
           <label class="check"><input type="radio" name="hierarchy" value="collegue"><span>Collègue</span></label>
+          <label class="check"><input type="radio" name="hierarchy" value="autre"><span>Autre</span></label>
+          <input type="text" class="other" id="hierarchyOther" name="hierarchyOther" maxlength="300" aria-label="Préciser le lien avec la personne concernée" placeholder="Préciser" autocomplete="off" hidden>
         </div>
       </div>
     </fieldset>
@@ -231,10 +234,11 @@
     </fieldset>
 
     <fieldset>
-      <legend><span class="h2">11. Déclaration du déclarant</span></legend>
+      <legend><span class="h2">11. Déclaration du déclarant</span>
+        <span class="hint">Les deux cases sont obligatoires pour envoyer la déclaration.</span></legend>
       <div class="checks">
-        <label class="check"><input type="checkbox" id="certifyAccurate" name="certifyAccurate"><span>Je certifie que les informations transmises sont exactes et sincères à ma connaissance.</span></label>
-        <label class="check"><input type="checkbox" id="certifyInformed" name="certifyInformed"><span>Je suis informé·e que ce formulaire peut être transmis aux personnes chargées du traitement des signalements au sein de l’organisme.</span></label>
+        <label class="check"><input type="checkbox" id="certifyAccurate" name="certifyAccurate" required><span>Je certifie que les informations transmises sont exactes et sincères à ma connaissance.</span></label>
+        <label class="check"><input type="checkbox" id="certifyInformed" name="certifyInformed" required><span>Je suis informé·e que ce formulaire va être transmis aux personnes chargées du traitement des signalements au sein de l’organisme.</span></label>
       </div>
       <div class="hp" aria-hidden="true">
         <label for="website">Ne pas remplir</label>
