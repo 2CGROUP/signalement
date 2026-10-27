@@ -26,20 +26,21 @@ const CONFIG = {
   // Laisser vide = le mail est envoyé au propriétaire du script (la boîte d'alerte).
   RECIPIENT: '',
   SENDER_NAME: 'Dispositif de signalement 2CGroup',
-  ENTITIES: ['2CGroup (holding)', '2CFinance', 'R4Innov', 'HR4Team', 'iytro', 'Collectively.life', 'Argura', 'Je ne sais pas / plusieurs'],
-  CATEGORIES: [
-    'Harcèlement moral',
-    'Harcèlement sexuel ou agissement sexiste',
-    'Discrimination',
-    'Atteinte à la santé ou à la sécurité',
-    'Fraude, corruption ou conflit d’intérêts',
-    'Atteinte à l’environnement',
-    'Autre manquement à la loi ou au règlement intérieur',
-  ],
+  // Valeurs autorisées : code envoyé par la page -> libellé affiché dans le mail
+  LISTS: {
+    roles: { concerne: 'Personnellement concerné·e par les faits', temoin: 'Témoin direct des faits', indirect: 'Connaissance indirecte des faits', autre: 'Autre' },
+    subjects: { harcelement_moral: 'Harcèlement moral', harcelement_sexuel: 'Harcèlement sexuel', discrimination: 'Discrimination', violences: 'Violences physiques ou verbales', autre: 'Autre' },
+    frequency: { isole: 'Fait isolé', repete: 'Répété', quotidien: 'Quotidien' },
+    hierarchy: { oui: 'Oui', non: 'Non', collegue: 'Collègue' },
+    evidence: { temoins: 'Témoins directs', ecrits: 'Écrits, courriels, messages, photos, enregistrements', medical: 'Comptes rendus médicaux ou arrêts de travail' },
+    steps: { aucune: 'Aucune démarche à ce jour', hierarchie: 'Alerte ou information de la hiérarchie', cse: 'Saisine des représentants du personnel / CSE', inspection: 'Déclaration à l’inspection du travail', plainte: 'Dépôt de plainte ou de main courante', medecin: 'Consultation du médecin du travail', autre: 'Autre' },
+    expectations: { enquete: 'Une enquête interne', protection: 'Une mesure de protection ou de mise à distance', mediation: 'Une médiation', enregistrement: 'Un simple enregistrement du signalement', suivi: 'Être informé·e de l’avancement', autre: 'Autre' },
+    urgent: { oui: 'OUI — risque immédiat pour la santé ou la sécurité', non: 'Non' },
+  },
   DIGEST_HOUR: 8,                 // heure de l'envoi groupé quotidien (Europe/Paris)
   MAX_PER_HOUR: 30,               // signalements acceptés par heure, tous utilisateurs confondus
-  MAX_BODY_CHARS: 40000,
-  LIMITS: { description: 10000, short: 300, medium: 3000, contact: 200 },
+  MAX_BODY_CHARS: 60000,
+  LIMITS: { description: 10000, details: 2000, evidence: 1000, short: 300, tiny: 120 },
 };
 
 const PROP_CODE = 'ACCESS_CODE';
@@ -201,7 +202,8 @@ function flush_(props) {
   const today = Utilities.formatDate(new Date(), TZ, 'dd/MM/yyyy');
   const mail = {
     to: CONFIG.RECIPIENT || Session.getEffectiveUser().getEmail(), // propriétaire du script, jamais le visiteur
-    subject: '[Signalements] ' + n + (n > 1 ? ' nouveaux signalements' : ' nouveau signalement') + ' — ' + today,
+    subject: (reports.some(function (r) { return r.urgent && r.urgent.indexOf('OUI') === 0; }) ? '[URGENT] ' : '')
+      + '[Signalements] ' + n + (n > 1 ? ' nouvelles déclarations' : ' nouvelle déclaration') + ' — ' + today,
     name: CONFIG.SENDER_NAME,
     htmlBody: reports.map(buildHtml_).join('<hr style="border:0;border-top:2px solid #cdc6fa;margin:28px 0">') + footerHtml_(),
     body: reports.map(buildText_).join('\n\n----------------------------------------\n\n'),
@@ -216,22 +218,52 @@ function flush_(props) {
 
 function validate_(f) {
   if (!f) return { error: 'Formulaire vide.' };
-  const L = CONFIG.LIMITS;
+  const L = CONFIG.LIMITS, LI = CONFIG.LISTS;
   const clean = function (v, max) { return String(v || '').replace(/\u0000/g, '').trim().slice(0, max); };
-  const d = {
-    entity: clean(f.entity, L.short),
-    category: clean(f.category, L.short),
-    period: clean(f.period, L.short),
-    description: clean(f.description, L.description),
-    people: clean(f.people, L.medium),
-    evidence: clean(f.evidence, L.medium),
-    contact: clean(f.contact, L.contact),
+  const list = function (v, map) {
+    return (Array.isArray(v) ? v : []).filter(function (x, i, arr) {
+      return Object.prototype.hasOwnProperty.call(map, x) && arr.indexOf(x) === i;
+    }).map(function (x) { return map[x]; });
   };
-  if (CONFIG.ENTITIES.indexOf(d.entity) === -1) return { error: 'Choisissez l’entité concernée.' };
-  if (CONFIG.CATEGORIES.indexOf(d.category) === -1) return { error: 'Choisissez le type de faits.' };
-  if (d.description.length < 30) return { error: 'Décrivez les faits en quelques phrases (30 caractères minimum).' };
-  if (d.contact && !isEmail_(d.contact)) return { error: 'L’adresse e-mail de contact n’est pas valide.' };
-  if (f.goodFaith !== true) return { error: 'Cochez la case de bonne foi pour envoyer le signalement.' };
+  const one = function (v, map) { return Object.prototype.hasOwnProperty.call(map, v) ? map[v] : ''; };
+  const date = function (v) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(v || ''));
+    return m ? m[3] + '/' + m[2] + '/' + m[1] : '';
+  };
+  const d = {
+    name: clean(f.name, L.tiny),
+    contact: clean(f.contact, L.short),
+    roles: list(f.roles, LI.roles), rolesOther: clean(f.rolesOther, L.short),
+    subjects: list(f.subjects, LI.subjects), subjectsOther: clean(f.subjectsOther, L.short),
+    discriminationGround: clean(f.discriminationGround, L.short),
+    subjectDetails: clean(f.subjectDetails, L.details),
+    description: clean(f.description, L.description),
+    dateFrom: date(f.dateFrom), dateTo: date(f.dateTo),
+    place: clean(f.place, L.short),
+    frequency: one(f.frequency, LI.frequency),
+    usualTime: clean(f.usualTime, L.tiny),
+    accusedName: clean(f.accusedName, L.short),
+    accusedService: clean(f.accusedService, L.short),
+    hierarchy: one(f.hierarchy, LI.hierarchy),
+    evidence: list(f.evidence, LI.evidence),
+    evidenceWitnesses: clean(f.evidenceWitnesses, L.evidence),
+    evidenceDocuments: clean(f.evidenceDocuments, L.evidence),
+    evidenceMedical: clean(f.evidenceMedical, L.evidence),
+    steps: list(f.steps, LI.steps), stepsOther: clean(f.stepsOther, L.short),
+    expectations: list(f.expectations, LI.expectations), expectationsOther: clean(f.expectationsOther, L.short),
+    urgent: one(f.urgent, LI.urgent),
+    certifyAccurate: f.certifyAccurate === true,
+    certifyInformed: f.certifyInformed === true,
+  };
+  const content = Object.keys(d).filter(function (k) {
+    return ['urgent', 'certifyAccurate', 'certifyInformed'].indexOf(k) === -1;
+  });
+  if (content.every(function (k) { return Array.isArray(d[k]) ? !d[k].length : !d[k]; })) {
+    return { error: 'Le formulaire est vide. Décrivez au moins la situation que vous souhaitez signaler.' };
+  }
+  if (d.expectations.indexOf(LI.expectations.suivi) !== -1 && !d.contact) {
+    return { error: 'Pour être informé·e de l’avancement, indiquez un moyen de contact dans la rubrique 1.' };
+  }
   return d;
 }
 
@@ -272,27 +304,62 @@ function esc_(s) {
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+function joinOther_(items, other) {
+  return items.join(', ') + (other ? (items.length ? ' ' : '') + '(précision : ' + other + ')' : '');
+}
+
+/** Rubriques du mail, dans l'ordre de la trame. Les lignes vides sont omises. */
+function sections_(d) {
+  return [
+    ['Réservé au comité d’éthique', [
+      ['N° de dossier', d.ref], ['Date de réception', d.day],
+      ['Situation urgente', d.urgent],
+      ['Reçu par (service / fonction)', '…'], ['Orientation', 'enquête, médiation, classement, autre'],
+    ]],
+    ['1. Identification', [['Nom ou pseudonyme', d.name], ['Contact', d.contact]]],
+    ['2. Qualité du déclarant', [['À quel titre', joinOther_(d.roles, d.rolesOther)]]],
+    ['3. Objet de la déclaration', [
+      ['Objet', joinOther_(d.subjects, d.subjectsOther)],
+      ['Motif de discrimination', d.discriminationGround], ['Précisions', d.subjectDetails]]],
+    ['4. Description des faits', [['Description', d.description]]],
+    ['5. Dates, lieux et fréquence', [
+      ['Période', [d.dateFrom, d.dateTo].filter(String).join(' → ')], ['Lieu ou service', d.place],
+      ['Fréquence', d.frequency], ['Heure habituelle', d.usualTime]]],
+    ['6. Personne(s) mise(s) en cause', [
+      ['Nom ou fonction', d.accusedName], ['Service / établissement', d.accusedService],
+      ['Lien hiérarchique', d.hierarchy]]],
+    ['7. Témoins et éléments matériels', [
+      ['Éléments signalés', d.evidence.join(', ')], ['Témoins', d.evidenceWitnesses],
+      ['Écrits, enregistrements', d.evidenceDocuments], ['Éléments médicaux', d.evidenceMedical]]],
+    ['8. Démarches déjà entreprises', [['Démarches', joinOther_(d.steps, d.stepsOther)]]],
+    ['9. Attentes', [['Suite attendue', joinOther_(d.expectations, d.expectationsOther)]]],
+    ['11. Déclaration du déclarant', [
+      ['Informations exactes et sincères', d.certifyAccurate ? 'Certifié' : 'Non coché'],
+      ['Informé·e de la transmission', d.certifyInformed ? 'Oui' : 'Non coché']]],
+  ].map(function (s) {
+    return [s[0], s[1].filter(function (r) { return r[1]; })];
+  }).filter(function (s) { return s[1].length; });
+}
+
 function row_(label, value) {
-  if (!value) return '';
-  return '<tr><td style="padding:10px 14px;vertical-align:top;color:#5b4be0;font-weight:bold;width:170px;border-bottom:1px solid #eceaf7">'
-    + label + '</td><td style="padding:10px 14px;color:#1f2330;white-space:pre-wrap;border-bottom:1px solid #eceaf7">'
+  return '<tr><td style="padding:8px 14px;vertical-align:top;color:#5b4be0;font-weight:bold;width:190px;border-bottom:1px solid #eceaf7">'
+    + esc_(label) + '</td><td style="padding:8px 14px;color:#1f2330;white-space:pre-wrap;border-bottom:1px solid #eceaf7">'
     + esc_(value) + '</td></tr>';
 }
 
 function buildHtml_(d) {
-  return '<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.55;max-width:720px">'
-    + '<p style="font-size:18px;font-weight:bold;color:#1f2330;margin:0 0 4px">Signalement ' + esc_(d.ref) + '</p>'
-    + '<p style="color:#4a4f5a;margin:0 0 16px">Déposé le ' + esc_(d.day) + '. '
-    + (d.contact ? 'L’auteur a laissé un moyen de contact.' : 'Signalement anonyme, sans moyen de contact.') + '</p>'
-    + '<table style="border-collapse:collapse;width:100%;background:#f9f8ff">'
-    + row_('Entité concernée', d.entity)
-    + row_('Type de faits', d.category)
-    + row_('Période des faits', d.period)
-    + row_('Description', d.description)
-    + row_('Personnes impliquées', d.people)
-    + row_('Éléments disponibles', d.evidence)
-    + row_('Contact de l’auteur', d.contact)
-    + '</table></div>';
+  const urgent = d.urgent && d.urgent.indexOf('OUI') === 0;
+  return '<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.55;max-width:760px">'
+    + '<p style="font-size:18px;font-weight:bold;color:#1f2330;margin:0 0 4px">Déclaration ' + esc_(d.ref)
+    + (urgent ? ' <span style="color:#b3261e">— situation urgente signalée</span>' : '') + '</p>'
+    + '<p style="color:#4a4f5a;margin:0 0 14px">Déposée le ' + esc_(d.day) + '. '
+    + (d.contact ? 'Le déclarant a laissé un moyen de contact.' : 'Déclaration anonyme, sans moyen de contact.') + '</p>'
+    + sections_(d).map(function (s) {
+      return '<p style="font-weight:bold;color:#1f2330;margin:18px 0 6px">' + esc_(s[0]) + '</p>'
+        + '<table style="border-collapse:collapse;width:100%;background:#f9f8ff">'
+        + s[1].map(function (r) { return row_(r[0], r[1]); }).join('') + '</table>';
+    }).join('')
+    + '</div>';
 }
 
 function footerHtml_() {
@@ -302,16 +369,8 @@ function footerHtml_() {
 }
 
 function buildText_(d) {
-  return [
-    'Signalement ' + d.ref + ' (déposé le ' + d.day + ')',
-    '',
-    'Entité concernée : ' + d.entity,
-    'Type de faits : ' + d.category,
-    d.period ? 'Période des faits : ' + d.period : '',
-    '',
-    'Description :', d.description, '',
-    d.people ? 'Personnes impliquées :\n' + d.people + '\n' : '',
-    d.evidence ? 'Éléments disponibles :\n' + d.evidence + '\n' : '',
-    d.contact ? 'Contact de l’auteur : ' + d.contact : 'Signalement anonyme, sans contact.',
-  ].join('\n');
+  return 'Déclaration ' + d.ref + ' (déposée le ' + d.day + ')\n\n'
+    + sections_(d).map(function (s) {
+      return s[0].toUpperCase() + '\n' + s[1].map(function (r) { return r[0] + ' : ' + r[1]; }).join('\n');
+    }).join('\n\n');
 }
