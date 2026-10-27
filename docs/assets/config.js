@@ -4,7 +4,7 @@
 window.SIGNALEMENT_CONFIG = {
   "v": 1,
   "iterations": 600000,
-  "salt": "R8Y491Gsf3f5k55hYENegg==",
-  "iv": "4LV7k8FCjk/5uARm",
-  "data": "wxns6MrhmO/eELHA+z9TVKmnvZHTxmC33DwaXtk0uefOPt3hTTkEQJyZiFisi7bG1dW9xGSL9dyThMiWEungG5hH+8SRQc7nTb+mckves57DNTEbY19fOFDe2v088jsS6H3yhbn6kWHTXKp1bGYowgFizQ7Sfv7wwmylRWnJp88="
+  "salt": "PB5SR+cDNc/3odXR4xQAyw==",
+  "iv": "xvUSaECrKB1322DX",
+  "data": "IIrT0tLo1jChpzK9mqSl0SKMaLnEVcNeKNzqmzTkKcsbBlZSinlwLkiw9DULhqHIaK+9iFYv778D2kM2yQ04lICEV1VWgbRlHbEz9LgywY55L1XhiBBuNApe/BcRmj5+52Dww/U4JAYuTATTid2xyGfytpSZY4tnHGu4dzir2gM="
 };
